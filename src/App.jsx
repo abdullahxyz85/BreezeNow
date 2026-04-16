@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import Logo from './assets/Logo.png'
-// import { VITE_WEATHER_API_KEY } from './secrets'; // Uncomment this line if you are using the secrets.js file and comment at the time of pushing to github
 
 function App() {
   const [city, setCity] = useState("London");
   const [cityInfo, setCityInfo] = useState("");
   const [temperature, setTemperature] = useState(null);
-  const [lattitude, setLatitude] = useState(null);
+  const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [moisture, setMoisture] = useState(null);
   const [windSpeed, setWindSpeed] = useState(null);
@@ -19,11 +18,10 @@ function App() {
   const [feelsLike, setFeelsLike] = useState(null);
   const [uv, setUv] = useState(null);
   const [error, setError] = useState(null);
-  const[region, setRegion]= useState(null);
+  const [region, setRegion] = useState(null);
 
   useEffect(() => {
-    // const apiKey = VITE_WEATHER_API_KEY; // Uncomment this line if you are using the secrets.js file and comment at the time of pushing to github
-    const apiKey = import.meta.env.VITE_WEATHER_API_KEY; // Comment this line if you are using the secrets.js file and uncomment at the time of pushing to github  
+    const apiKey = import.meta.env.VITE_WEATHER_API_KEY;   
     const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=yes`;
     const fetchData = async () => {
       try {
@@ -69,16 +67,18 @@ function App() {
 
   const WeatherDetail = () => {
     return (
-      <div className="datas">
+      <div className="datas flex flex-col items-center justify-center gap-10">
         <div className="imp-datas flex flex-col md:flex-row gap-10">
-          <div className="location-detail flex flex-col items-center gap-1 justify-center">
+          <div className="location-detail flex flex-col items-center gap-5 justify-center">
             <h1 className='text-4xl font-bold text-white'>{city}</h1>
-            {region && <p className='text-white'>Region : {region}</p>}
-            <p className='text-white'>Lattitude : {lattitude}</p>
-            <p className='text-white'>Longitude : {longitude}</p>
+            {region && <p className='text-white flex items-center gap-1'><span className='font-bold'>Region : </span> <span className='details region-detail'>{region}</span></p>}
+            <div className="latt-long flex items-center gap-5">
+              <p className='text-white'><span className='font-bold'>Latitude : </span> <span className='details'>{latitude}</span></p>
+              <p className='text-white'><span className='font-bold'>Longitude : </span><span className='details'>{longitude}</span></p>
+            </div>
           </div>
           <div className="condition flex flex-col items-center gap-4 mt-6 justify-center">
-            {icon && <img src={icon} alt="weather icon" width={100} />}
+            {icon && <img className='icon' src={icon} alt="weather icon" width={100} />}
             {condition && <p className='text-2xl font-semibold text-white'>{condition}</p>}
           </div>
           <div className="temp flex flex-col items-center gap-4 justify-center">
@@ -88,12 +88,36 @@ function App() {
         </div>
         <div className="less-imp-datas mb-20">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-10 mt-10">
-            {moisture !== null && <p className='text-lg font-semibold text-white'>Dew Point : {moisture}&#8451;</p>}
-            {windSpeed !== null && <p className='text-lg font-semibold text-white'>Wind Speed : {windSpeed} KPH</p>}
-            {pressure !== null && <p className='text-lg font-semibold text-white'>Pressure : {pressure} in</p>}
-            {humidity !== null && <p className='text-lg font-semibold text-white'>Humidity : {humidity} %</p>}
-            {cloud !== null && <p className='text-lg font-semibold text-white'>Cloud : {cloud} %</p>}
-            {uv !== null && <p className='text-lg font-semibold text-white'>UV Index : {uv}</p>}
+            {moisture !== null && <div className="card">
+              <p className='text-lg font-semibold text-white'>
+                Dew Point : {moisture}&#8451;
+              </p>
+            </div>}
+            {windSpeed !== null && <div className="card">
+              <p className='text-lg font-semibold text-white'>
+                Wind Speed : {windSpeed} KPH
+              </p>
+            </div>}
+            {pressure !== null && <div className="card">
+              <p className='text-lg font-semibold text-white'>
+                Pressure : {pressure} in
+              </p>
+            </div>}
+            {humidity !== null && <div className="card">
+              <p className='text-lg font-semibold text-white'>
+                Humidity : {humidity} %
+              </p>
+            </div>}
+            {cloud !== null && <div className="card">
+              <p className='text-lg font-semibold text-white'>
+                Cloud : {cloud} %
+              </p>
+            </div>}
+            {uv !== null && <div className="card">
+              <p className='text-lg font-semibold text-white'>
+                UV Index : {uv}
+              </p>
+            </div>}
           </div>
         </div>
       </div>

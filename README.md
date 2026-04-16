@@ -66,11 +66,12 @@ npm install
 
 3. Copy your unique API Key from the dashboard.
 
-4. Create a file named `secrets.js` in the `src` directory of your project.
+4. Create a file named `.env` in the root directory of your project.
 
-5. Add the following line to the `secrets.js` file:
+5. Add the following line to the `.env` file:
  ```
- export const VITE_WEATHER_API_KEY=your_api_key_here;
+ VITE_WEATHER_API_KEY=<Your API Key>
+
  ```
 
  ### 4. Run the Application
