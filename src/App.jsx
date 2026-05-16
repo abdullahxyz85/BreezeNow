@@ -18,6 +18,7 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [backgroundClass, setBackgroundClass] = useState("bg-gradient-to-br from-blue-900 to-blue-600");
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   useEffect(() => {
     // Geolocation on initial load
@@ -120,6 +121,40 @@ function App() {
 
   }, [city])
 
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLoadingLocation(true);
+    setCityInfo("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCity(`${latitude},${longitude}`);
+        setLoadingLocation(false);
+      },
+      (error) => {
+        setLoadingLocation(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setError("Location permission denied");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setError("Location information is unavailable");
+            break;
+          case error.TIMEOUT:
+            setError("The request to get user location timed out");
+            break;
+          default:
+            setError("An unknown error occurred while fetching location");
+            break;
+        }
+      }
+    );
+  };
+
   const handleChange = (e) => {
     setCityInfo(e.target.value);
     setShowSuggestions(true);
@@ -141,6 +176,118 @@ function App() {
 
   const toggleUnit = () => setIsCelsius(!isCelsius);
 
+  const getWeatherInsights = () => {
+    if (!weatherData) return [];
+    const insights = [];
+    const current = weatherData.current;
+    const temperature = current.temp_c;
+    const uv = current.uv;
+    const windSpeed = current.wind_kph;
+    const humidity = current.humidity;
+    const condition = current.condition.text;
+
+    if (temperature >= 35) {
+      insights.push({
+        title: "Stay hydrated in high temperatures",
+        description: `Temperatures above ${temperature}°C — drink water regularly and avoid prolonged sun exposure.`,
+        emoji: "🌡️",
+        accent: "bg-yellow-500/20 border-yellow-500",
+      });
+    }
+
+    if (uv >= 6) {
+      insights.push({
+        title: "High UV exposure today",
+        description: `UV index is currently ${uv}. Use sunscreen and avoid excessive sun exposure.`,
+        emoji: "🧴",
+        accent: "bg-orange-500/20 border-orange-500",
+      });
+    }
+
+    if (windSpeed >= 25) {
+      insights.push({
+        title: "Strong winds expected outside",
+        description: `Wind speeds at ${windSpeed} KPH — be cautious while traveling outdoors.`,
+        emoji: "💨",
+        accent: "bg-blue-500/20 border-blue-500",
+      });
+    }
+
+    if (humidity >= 80) {
+      insights.push({
+        title: "High humidity levels today",
+        description: `Humidity is currently ${humidity}% which may make the weather feel warmer.`,
+        emoji: "💧",
+        accent: "bg-cyan-500/20 border-cyan-500",
+      });
+    }
+
+    if (condition?.toLowerCase().includes("rain")) {
+      insights.push({
+        title: "Carry an umbrella before heading out",
+        description: "Rainy conditions are expected today. Keep an umbrella or raincoat handy.",
+        emoji: "🌧️",
+        accent: "bg-indigo-500/20 border-indigo-500",
+      });
+    }
+
+    if (condition?.toLowerCase().includes("sunny") || condition?.toLowerCase().includes("clear")) {
+      insights.push({
+        title: "Great weather for outdoor activities",
+        description: "Clear skies and pleasant visibility make this ideal for outdoor plans.",
+        emoji: "☀️",
+        accent: "bg-green-500/20 border-green-500",
+      });
+    }
+
+    if (condition?.toLowerCase().includes("overcast") || condition?.toLowerCase().includes("cloudy")) {
+      insights.push({
+        title: "Cloudy skies expected today",
+        description: "Dense cloud cover may reduce sunlight throughout the day.",
+        emoji: "☁️",
+        accent: "bg-gray-500/20 border-gray-500",
+      });
+    }
+
+    if (condition?.toLowerCase().includes("mist") || condition?.toLowerCase().includes("fog") || condition?.toLowerCase().includes("haze")) {
+      insights.push({
+        title: "Reduced visibility outdoors",
+        description: "Mist or fog conditions may affect visibility while driving or traveling.",
+        emoji: "🌫️",
+        accent: "bg-slate-500/20 border-slate-500",
+      });
+    }
+
+    if (condition?.toLowerCase().includes("thunder")) {
+      insights.push({
+        title: "Thunderstorm conditions detected",
+        description: "Take precautions and avoid open areas during thunderstorms.",
+        emoji: "⛈️",
+        accent: "bg-purple-500/20 border-purple-500",
+      });
+    }
+
+    if (condition?.toLowerCase().includes("snow")) {
+      insights.push({
+        title: "Snowfall expected today",
+        description: "Cold and snowy conditions may affect travel and outdoor activities.",
+        emoji: "❄️",
+        accent: "bg-blue-300/20 border-blue-300",
+      });
+    }
+
+    if (temperature <= 10) {
+      insights.push({
+        title: "Cold weather detected",
+        description: "Wear warm clothing and avoid prolonged exposure to cold weather.",
+        emoji: "🧥",
+        accent: "bg-cyan-600/20 border-cyan-600",
+      });
+    }
+
+    return insights.slice(0, 3);
+  };
+
   const ErrorBox = () => {
     return (
       <div className="errorbox my-10 p-4 bg-red-100 rounded-lg">
@@ -155,6 +302,7 @@ function App() {
     const temp = isCelsius ? current.temp_c : current.temp_f;
     const feelsLike = isCelsius ? current.feelslike_c : current.feelslike_f;
     const unit = isCelsius ? "℃" : "℉";
+    const insights = getWeatherInsights();
 
     return (
       <div className="datas flex flex-col items-center justify-center gap-10 w-full max-w-4xl px-4">
@@ -203,6 +351,36 @@ function App() {
               <span className="text-2xl font-bold text-white">{current.air_quality?.["us-epa-index"] || "N/A"}</span>
             </div>
           </div>
+          
+          {insights.length > 0 && (
+            <div className="advisory-section mt-10 w-full">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="h-px bg-white/30 flex-1"></div>
+                <p className="text-white/80 font-semibold tracking-wider text-sm">WEATHER INSIGHTS</p>
+                <div className="h-px bg-white/30 flex-1"></div>
+              </div>
+
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-white drop-shadow-md">🌤 Today's Advisory</h2>
+                <p className="text-gray-200">Based on current weather conditions</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {insights.map((insight, index) => (
+                  <div
+                    key={index}
+                    className={`p-5 rounded-xl backdrop-blur-md shadow-lg border-t-4 flex flex-col items-center text-center transition-transform hover:scale-105 ${insight.accent}`}
+                  >
+                    <div className="text-4xl mb-3">
+                      {insight.emoji}
+                    </div>
+                    <h3 className="text-white font-bold text-lg mb-2">{insight.title}</h3>
+                    <p className="text-white/90 text-sm">{insight.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Forecast Section */}
@@ -261,6 +439,14 @@ function App() {
               className='p-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition'
             >
               Search
+            </button>
+            <button
+              onClick={handleUseCurrentLocation}
+              disabled={loadingLocation}
+              className='p-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg transition disabled:opacity-50'
+              title="Use Current Location"
+            >
+              {loadingLocation ? "..." : "📍"}
             </button>
 
             {/* Suggestions Dropdown */}
