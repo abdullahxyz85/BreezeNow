@@ -300,6 +300,8 @@ function App() {
       accent: "cyan",
     });
   }
+    return insights;
+}
 
   const ErrorBox = () => {
     return (
