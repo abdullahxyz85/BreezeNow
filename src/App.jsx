@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import Logo from './assets/Logo.png'
-import { Card } from './components/Card'
-import { FeaturesGrid } from './components/FeaturesGrid'
-import { Hero } from './components/Hero'
-import { ThemeToggle } from './components/ThemeToggle'
+import { useEffect, useState } from "react";
+import "./App.css";
+import Logo from "./assets/Logo.png";
+import { Card } from "./components/Card";
+import { BackToTop } from "./components/BackToTop";
+import { FeaturesGrid } from "./components/FeaturesGrid";
+import { Hero } from "./components/Hero";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 function App() {
   const [city, setCity] = useState("Patna");
@@ -18,18 +19,22 @@ function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {
-    const saved = localStorage.getItem('recentSearches');
+    const saved = localStorage.getItem("recentSearches");
     return saved ? JSON.parse(saved) : [];
   });
-  const [backgroundClass, setBackgroundClass] = useState("bg-gradient-to-br from-blue-900 to-blue-600");
+  const [backgroundClass, setBackgroundClass] = useState(
+    "bg-gradient-to-br from-blue-900 to-blue-600",
+  );
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light' || savedTheme === 'dark') {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") {
       return savedTheme;
     }
 
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   });
 
   const [weather, setWeather] = useState({
@@ -48,16 +53,16 @@ function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
   }, [recentSearches]);
 
   useEffect(() => {
-    localStorage.setItem('theme', theme);
+    localStorage.setItem("theme", theme);
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   };
 
   const buildWeatherSummary = (data, useCelsius) => {
@@ -73,7 +78,9 @@ function App() {
       humidity: current.humidity,
       cloud: current.cloud,
       condition: current.condition.text,
-      icon: current.condition.icon.startsWith("//") ? `https:${current.condition.icon}` : current.condition.icon,
+      icon: current.condition.icon.startsWith("//")
+        ? `https:${current.condition.icon}`
+        : current.condition.icon,
       feelsLike: useCelsius ? current.feelslike_c : current.feelslike_f,
       uv: current.uv,
     };
@@ -87,7 +94,9 @@ function App() {
       }
       try {
         const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
-        const res = await fetch(`https://api.weatherapi.com/v1/search.json?key=${apiKey}&q=${cityInfo}`);
+        const res = await fetch(
+          `https://api.weatherapi.com/v1/search.json?key=${apiKey}&q=${cityInfo}`,
+        );
         if (res.ok) {
           const data = await res.json();
           setSuggestions(data);
@@ -123,9 +132,11 @@ function App() {
         setForecastData(data.forecast?.forecastday || []);
 
         const locationName = data.location.name;
-        if (!city.includes(',')) {
-          setRecentSearches(prev => {
-            const filtered = prev.filter(s => s.toLowerCase() !== locationName.toLowerCase());
+        if (!city.includes(",")) {
+          setRecentSearches((prev) => {
+            const filtered = prev.filter(
+              (s) => s.toLowerCase() !== locationName.toLowerCase(),
+            );
             return [locationName, ...filtered].slice(0, 5);
           });
         }
@@ -135,30 +146,39 @@ function App() {
 
         if (isDay === 0) {
           setBackgroundClass("bg-gradient-to-br from-indigo-900 to-black");
-        } else if (conditionText.includes("sunny") || conditionText.includes("clear")) {
+        } else if (
+          conditionText.includes("sunny") ||
+          conditionText.includes("clear")
+        ) {
           setBackgroundClass("bg-gradient-to-br from-yellow-400 to-orange-500");
-        } else if (conditionText.includes("rain") || conditionText.includes("drizzle")) {
+        } else if (
+          conditionText.includes("rain") ||
+          conditionText.includes("drizzle")
+        ) {
           setBackgroundClass("bg-gradient-to-br from-gray-700 to-blue-900");
-        } else if (conditionText.includes("cloud") || conditionText.includes("overcast")) {
+        } else if (
+          conditionText.includes("cloud") ||
+          conditionText.includes("overcast")
+        ) {
           setBackgroundClass("bg-gradient-to-br from-gray-400 to-gray-600");
-        } else if (conditionText.includes("snow") || conditionText.includes("ice")) {
+        } else if (
+          conditionText.includes("snow") ||
+          conditionText.includes("ice")
+        ) {
           setBackgroundClass("bg-gradient-to-br from-blue-100 to-blue-300");
         } else {
           setBackgroundClass("bg-gradient-to-br from-blue-900 to-blue-600");
         }
-
       } catch (err) {
         console.error(err);
         setError("Error fetching data");
-
       }
-    }
+    };
 
     if (city) {
       fetchData();
     }
-
-  }, [city])
+  }, [city]);
 
   useEffect(() => {
     if (weatherData) {
@@ -225,151 +245,141 @@ function App() {
             setError("An unknown error occurred while fetching location");
             break;
         }
-      }
+      },
     );
   };
 
   const handleChange = (e) => {
     setCityInfo(e.target.value);
-  }
+  };
   const getWeatherInsights = () => {
-  const insights = [];
+    const insights = [];
 
-  if (weather.temperature >= 35) {
-    insights.push({
-      title: "Stay hydrated in high temperatures",
-      description:
-        `Temperatures above ${weather.temperature}°C — drink water regularly and avoid prolonged sun exposure.`,
-      emoji: "🌡️",
-      accent: "yellow",
-    });
-  }
+    if (weather.temperature >= 35) {
+      insights.push({
+        title: "Stay hydrated in high temperatures",
+        description: `Temperatures above ${weather.temperature}°C — drink water regularly and avoid prolonged sun exposure.`,
+        emoji: "🌡️",
+        accent: "yellow",
+      });
+    }
 
-  if (weather.uv >= 6) {
-    insights.push({
-      title: "High UV exposure today",
-      description:
-        `UV index is currently ${weather.uv}. Use sunscreen and avoid excessive sun exposure.`,
-      emoji: "🧴",
-      accent: "yellow",
-    });
-  }
+    if (weather.uv >= 6) {
+      insights.push({
+        title: "High UV exposure today",
+        description: `UV index is currently ${weather.uv}. Use sunscreen and avoid excessive sun exposure.`,
+        emoji: "🧴",
+        accent: "yellow",
+      });
+    }
 
-  if (weather.windSpeed >= 25) {
-    insights.push({
-      title: "Strong winds expected outside",
-      description:
-        `Wind speeds at ${weather.windSpeed} KPH — be cautious while traveling outdoors.`,
-      emoji: "💨",
-      accent: "blue",
-    });
-  }
+    if (weather.windSpeed >= 25) {
+      insights.push({
+        title: "Strong winds expected outside",
+        description: `Wind speeds at ${weather.windSpeed} KPH — be cautious while traveling outdoors.`,
+        emoji: "💨",
+        accent: "blue",
+      });
+    }
 
-  if (weather.humidity >= 80) {
-    insights.push({
-      title: "High humidity levels today",
-      description:
-        `Humidity is currently ${weather.humidity}% which may make the weather feel warmer.`,
-      emoji: "💧",
-      accent: "cyan",
-    });
-  }
+    if (weather.humidity >= 80) {
+      insights.push({
+        title: "High humidity levels today",
+        description: `Humidity is currently ${weather.humidity}% which may make the weather feel warmer.`,
+        emoji: "💧",
+        accent: "cyan",
+      });
+    }
 
-  if (
-    weather.condition?.toLowerCase().includes("rain")
-  ) {
-    insights.push({
-      title: "Carry an umbrella before heading out",
-      description:
-        "Rainy conditions are expected today. Keep an umbrella or raincoat handy.",
-      emoji: "🌧️",
-      accent: "purple",
-    });
-  }
+    if (weather.condition?.toLowerCase().includes("rain")) {
+      insights.push({
+        title: "Carry an umbrella before heading out",
+        description:
+          "Rainy conditions are expected today. Keep an umbrella or raincoat handy.",
+        emoji: "🌧️",
+        accent: "purple",
+      });
+    }
 
-  if (
-    weather.condition?.toLowerCase().includes("sunny") ||
-    weather.condition?.toLowerCase().includes("clear")
-  ) {
-    insights.push({
-      title: "Great weather for outdoor activities",
-      description:
-        "Clear skies and pleasant visibility make this ideal for outdoor plans.",
-      emoji: "☀️",
-      accent: "green",
-    });
-  }
+    if (
+      weather.condition?.toLowerCase().includes("sunny") ||
+      weather.condition?.toLowerCase().includes("clear")
+    ) {
+      insights.push({
+        title: "Great weather for outdoor activities",
+        description:
+          "Clear skies and pleasant visibility make this ideal for outdoor plans.",
+        emoji: "☀️",
+        accent: "green",
+      });
+    }
 
-  if (
-    weather.condition?.toLowerCase().includes("overcast") ||
-    weather.condition?.toLowerCase().includes("cloudy")
-  ) {
-    insights.push({
-      title: "Cloudy skies expected today",
-      description:
-        "Dense cloud cover may reduce sunlight throughout the day.",
-      emoji: "☁️",
-      accent: "gray",
-    });
-  }
+    if (
+      weather.condition?.toLowerCase().includes("overcast") ||
+      weather.condition?.toLowerCase().includes("cloudy")
+    ) {
+      insights.push({
+        title: "Cloudy skies expected today",
+        description:
+          "Dense cloud cover may reduce sunlight throughout the day.",
+        emoji: "☁️",
+        accent: "gray",
+      });
+    }
 
-  if (
-    weather.condition?.toLowerCase().includes("mist") ||
-    weather.condition?.toLowerCase().includes("fog") ||
-    weather.condition?.toLowerCase().includes("haze")
-  ) {
-    insights.push({
-      title: "Reduced visibility outdoors",
-      description:
-        "Mist or fog conditions may affect visibility while driving or traveling.",
-      emoji: "🌫️",
-      accent: "cyan",
-    });
-  }
+    if (
+      weather.condition?.toLowerCase().includes("mist") ||
+      weather.condition?.toLowerCase().includes("fog") ||
+      weather.condition?.toLowerCase().includes("haze")
+    ) {
+      insights.push({
+        title: "Reduced visibility outdoors",
+        description:
+          "Mist or fog conditions may affect visibility while driving or traveling.",
+        emoji: "🌫️",
+        accent: "cyan",
+      });
+    }
 
-  if (
-    weather.condition?.toLowerCase().includes("thunder")
-  ) {
-    insights.push({
-      title: "Thunderstorm conditions detected",
-      description:
-        "Take precautions and avoid open areas during thunderstorms.",
-      emoji: "⛈️",
-      accent: "purple",
-    });
-  }
+    if (weather.condition?.toLowerCase().includes("thunder")) {
+      insights.push({
+        title: "Thunderstorm conditions detected",
+        description:
+          "Take precautions and avoid open areas during thunderstorms.",
+        emoji: "⛈️",
+        accent: "purple",
+      });
+    }
 
-  if (
-    weather.condition?.toLowerCase().includes("snow")
-  ) {
-    insights.push({
-      title: "Snowfall expected today",
-      description:
-        "Cold and snowy conditions may affect travel and outdoor activities.",
-      emoji: "❄️",
-      accent: "blue",
-    });
-  }
+    if (weather.condition?.toLowerCase().includes("snow")) {
+      insights.push({
+        title: "Snowfall expected today",
+        description:
+          "Cold and snowy conditions may affect travel and outdoor activities.",
+        emoji: "❄️",
+        accent: "blue",
+      });
+    }
 
-  if (weather.temperature <= 10) {
-    insights.push({
-      title: "Cold weather detected",
-      description:
-        "Wear warm clothing and avoid prolonged exposure to cold weather.",
-      emoji: "🧥",
-      accent: "cyan",
-    });
-  }
+    if (weather.temperature <= 10) {
+      insights.push({
+        title: "Cold weather detected",
+        description:
+          "Wear warm clothing and avoid prolonged exposure to cold weather.",
+        emoji: "🧥",
+        accent: "cyan",
+      });
+    }
     return insights;
-}
+  };
 
   const ErrorBox = () => {
     return (
       <div className="errorbox my-10 p-4 bg-red-100 rounded-lg text-center">
-        <h1 className='text-2xl font-bold text-red-600'>{error}</h1>
+        <h1 className="text-2xl font-bold text-red-600">{error}</h1>
       </div>
     );
-  }
+  };
 
   const WeatherDetail = () => {
     if (!weatherData) return null;
@@ -386,10 +396,12 @@ function App() {
         <div className="weather-toolbar">
           <div>
             <p className="section-kicker">Live Weather</p>
-            <h2 className="text-3xl font-black tracking-tight m-0 text-current">Patna weather at a glance</h2>
+            <h2 className="text-3xl font-black tracking-tight m-0 text-current">
+              Patna weather at a glance
+            </h2>
           </div>
           <button onClick={toggleUnit} className="unit-switch">
-            Switch to {isCelsius ? '°F' : '°C'}
+            Switch to {isCelsius ? "°F" : "°C"}
           </button>
         </div>
 
@@ -397,32 +409,77 @@ function App() {
           <div className="weather-current-overview">
             <p className="weather-status">Current conditions</p>
             <h3>{cityName}</h3>
-            <p>{region ? `${region}, ${location.country}` : location.country}</p>
+            <p>
+              {region ? `${region}, ${location.country}` : location.country}
+            </p>
             <div className="weather-current">
               <div className="weather-current-left">
-                {weather.icon && <img src={weather.icon} alt={weather.condition || 'Weather condition'} />}
+                {weather.icon && (
+                  <img
+                    src={weather.icon}
+                    alt={weather.condition || "Weather condition"}
+                  />
+                )}
                 <div>
                   <strong>{weather.condition}</strong>
                   <span>{location.localtime}</span>
                 </div>
               </div>
               <div className="weather-current-temp">
-                <strong>{temp}{unit}</strong>
-                <span>Feels like {feelsLike}{unit}</span>
+                <strong>
+                  {temp}
+                  {unit}
+                </strong>
+                <span>
+                  Feels like {feelsLike}
+                  {unit}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="hero-chip">Lat {weather.latitude} / Lon {weather.longitude}</div>
+          <div className="hero-chip">
+            Lat {weather.latitude} / Lon {weather.longitude}
+          </div>
         </div>
 
         <div className="weather-summary-grid">
-          <Card badge="Temperature" title={`${weather.temperature}${unit}`} text="Live temperature from WeatherAPI." subtle />
-          <Card badge="Wind" title={`${weather.windSpeed} KPH`} text="Wind speed and air movement." subtle />
-          <Card badge="Humidity" title={`${weather.humidity}%`} text="Moisture in the air right now." subtle />
-          <Card badge="Pressure" title={`${weather.pressure} mb`} text="Barometric pressure reading." subtle />
-          <Card badge="Dew point" title={`${weather.moisture}${unit}`} text="Perceived moisture point." subtle />
-          <Card badge="UV index" title={`${weather.uv}`} text="UV exposure guidance for the day." subtle />
+          <Card
+            badge="Temperature"
+            title={`${weather.temperature}${unit}`}
+            text="Live temperature from WeatherAPI."
+            subtle
+          />
+          <Card
+            badge="Wind"
+            title={`${weather.windSpeed} KPH`}
+            text="Wind speed and air movement."
+            subtle
+          />
+          <Card
+            badge="Humidity"
+            title={`${weather.humidity}%`}
+            text="Moisture in the air right now."
+            subtle
+          />
+          <Card
+            badge="Pressure"
+            title={`${weather.pressure} mb`}
+            text="Barometric pressure reading."
+            subtle
+          />
+          <Card
+            badge="Dew point"
+            title={`${weather.moisture}${unit}`}
+            text="Perceived moisture point."
+            subtle
+          />
+          <Card
+            badge="UV index"
+            title={`${weather.uv}`}
+            text="UV exposure guidance for the day."
+            subtle
+          />
         </div>
 
         {insights.length > 0 && (
@@ -430,7 +487,10 @@ function App() {
             <div className="section-heading align-start">
               <p className="section-kicker">Daily guidance</p>
               <h2>What to keep in mind today</h2>
-              <p>Short, practical advice based on the live weather conditions in Patna.</p>
+              <p>
+                Short, practical advice based on the live weather conditions in
+                Patna.
+              </p>
             </div>
 
             <FeaturesGrid>
@@ -452,20 +512,42 @@ function App() {
             <div className="section-heading align-start">
               <p className="section-kicker">Forecast</p>
               <h2>3-day outlook</h2>
-              <p>A quick read on the next few days so the app feels like a complete weather product, not just a lookup tool.</p>
+              <p>
+                A quick read on the next few days so the app feels like a
+                complete weather product, not just a lookup tool.
+              </p>
             </div>
 
             <div className="forecast-grid">
               {forecastData.map((day) => {
-                const maxTemp = isCelsius ? day.day.maxtemp_c : day.day.maxtemp_f;
-                const minTemp = isCelsius ? day.day.mintemp_c : day.day.mintemp_f;
+                const maxTemp = isCelsius
+                  ? day.day.maxtemp_c
+                  : day.day.maxtemp_f;
+                const minTemp = isCelsius
+                  ? day.day.mintemp_c
+                  : day.day.mintemp_f;
 
                 return (
                   <article key={day.date} className="forecast-card">
-                    <p>{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                    <img src={day.day.condition.icon} alt={day.day.condition.text} />
-                    <strong>{maxTemp}{unit}</strong>
-                    <span>{minTemp}{unit}</span>
+                    <p>
+                      {new Date(day.date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                    <img
+                      src={day.day.condition.icon}
+                      alt={day.day.condition.text}
+                    />
+                    <strong>
+                      {maxTemp}
+                      {unit}
+                    </strong>
+                    <span>
+                      {minTemp}
+                      {unit}
+                    </span>
                     <small>{day.day.condition.text}</small>
                   </article>
                 );
@@ -475,19 +557,22 @@ function App() {
         )}
       </div>
     );
-  }
-
-  const heroWeather = weatherData ? weather : {
-    temperature: '--',
-    condition: 'Searching for live data',
-    icon: null,
-    feelsLike: '--',
-    humidity: '--',
-    windSpeed: '--',
   };
+
+  const heroWeather = weatherData
+    ? weather
+    : {
+        temperature: "--",
+        condition: "Searching for live data",
+        icon: null,
+        feelsLike: "--",
+        humidity: "--",
+        windSpeed: "--",
+      };
 
   return (
     <div className="app-shell">
+      <BackToTop />
       <div className="page-shell">
         <header className="topbar">
           <a className="brand" href="#top" aria-label="BreezeNow home">
@@ -499,8 +584,12 @@ function App() {
           </a>
 
           <div className="topbar-actions">
-            <a className="ghost-link" href="#weather">Weather</a>
-            <a className="ghost-link" href="#forecast">Forecast</a>
+            <a className="ghost-link" href="#weather">
+              Weather
+            </a>
+            <a className="ghost-link" href="#forecast">
+              Forecast
+            </a>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
         </header>
@@ -508,17 +597,23 @@ function App() {
         <Hero
           kicker="Real-time weather"
           headline={[
-            'A calmer way to check the ',
-            <span key="accent" className="accent-text">weather</span>,
-            ' every day.'
+            "A calmer way to check the ",
+            <span key="accent" className="accent-text">
+              weather
+            </span>,
+            " every day.",
           ]}
           description="BreezeNow keeps the interface focused, fast, and easy to scan. Start with Patna, switch units instantly, and get the important details without noise."
-          actions={(
+          actions={
             <>
-              <a className="primary-button" href="#weather">Explore live weather</a>
-              <a className="secondary-button" href="#forecast">See the forecast</a>
+              <a className="primary-button" href="#weather">
+                Explore live weather
+              </a>
+              <a className="secondary-button" href="#forecast">
+                See the forecast
+              </a>
             </>
-          )}
+          }
         >
           <div className="hero-art landing-hero-art">
             <div className="hero-art-glow" />
@@ -528,10 +623,14 @@ function App() {
                   <img src={Logo} alt="BreezeNow" />
                   <div>
                     <span>Live weather</span>
-                    <strong>{weatherData ? weatherData.location.name : 'Patna'}</strong>
+                    <strong>
+                      {weatherData ? weatherData.location.name : "Patna"}
+                    </strong>
                   </div>
                 </div>
-                <div className="hero-chip">{isCelsius ? 'Celsius' : 'Fahrenheit'}</div>
+                <div className="hero-chip">
+                  {isCelsius ? "Celsius" : "Fahrenheit"}
+                </div>
               </div>
 
               <div className="hero-device-panel weather-current">
@@ -539,13 +638,21 @@ function App() {
                   <p>Condition</p>
                   <strong>{heroWeather.condition}</strong>
                 </div>
-                <div className="hero-chip">{weatherData ? weatherData.location.country : 'India'}</div>
+                <div className="hero-chip">
+                  {weatherData ? weatherData.location.country : "India"}
+                </div>
               </div>
 
               <div className="landing-stat-row">
                 <article>
-                  <strong>{heroWeather.temperature}{isCelsius ? '°C' : '°F'}</strong>
-                  <span>Feels like {heroWeather.feelsLike}{isCelsius ? '°C' : '°F'}</span>
+                  <strong>
+                    {heroWeather.temperature}
+                    {isCelsius ? "°C" : "°F"}
+                  </strong>
+                  <span>
+                    Feels like {heroWeather.feelsLike}
+                    {isCelsius ? "°C" : "°F"}
+                  </span>
                 </article>
                 <article>
                   <strong>{heroWeather.humidity}%</strong>
@@ -556,7 +663,11 @@ function App() {
                   <span>Wind speed right now</span>
                 </article>
                 <article>
-                  <strong>{weatherData ? weatherData.forecast?.forecastday?.length || 0 : 3}</strong>
+                  <strong>
+                    {weatherData
+                      ? weatherData.forecast?.forecastday?.length || 0
+                      : 3}
+                  </strong>
                   <span>Forecast days ready</span>
                 </article>
               </div>
@@ -574,14 +685,33 @@ function App() {
           <div className="section-heading">
             <p className="section-kicker">Why it feels premium</p>
             <h2>Focused weather cards instead of a cluttered dashboard.</h2>
-            <p>BreezeNow keeps the page visually light while still surfacing the details people actually check.</p>
+            <p>
+              BreezeNow keeps the page visually light while still surfacing the
+              details people actually check.
+            </p>
           </div>
 
           <FeaturesGrid>
-            <Card badge="Fast" title="Instant city lookup" text="Search any city or pick a recent one without losing the page context." />
-            <Card badge="Clear" title="Readable temperature units" text="Celsius is the default, with one tap to switch units when needed." />
-            <Card badge="Useful" title="Advisories that matter" text="Short weather guidance appears only when the conditions justify it." />
-            <Card badge="Live" title="Forecasts with intent" text="A clean three-day outlook gives the page a complete, product-like feel." />
+            <Card
+              badge="Fast"
+              title="Instant city lookup"
+              text="Search any city or pick a recent one without losing the page context."
+            />
+            <Card
+              badge="Clear"
+              title="Readable temperature units"
+              text="Celsius is the default, with one tap to switch units when needed."
+            />
+            <Card
+              badge="Useful"
+              title="Advisories that matter"
+              text="Short weather guidance appears only when the conditions justify it."
+            />
+            <Card
+              badge="Live"
+              title="Forecasts with intent"
+              text="A clean three-day outlook gives the page a complete, product-like feel."
+            />
           </FeaturesGrid>
         </section>
 
@@ -589,32 +719,39 @@ function App() {
           <div className="section-heading align-start">
             <p className="section-kicker">Search</p>
             <h2>Check a location in one line.</h2>
-            <p>Search is still available, but the presentation is calmer and closer to a polished landing page than a raw utility screen.</p>
+            <p>
+              Search is still available, but the presentation is calmer and
+              closer to a polished landing page than a raw utility screen.
+            </p>
           </div>
 
           <div className="weather-search">
-            <label className="sr-only" htmlFor="weather-city">City name</label>
+            <label className="sr-only" htmlFor="weather-city">
+              City name
+            </label>
             <input
               id="weather-city"
               type="text"
-              placeholder='Enter city name'
+              placeholder="Enter city name"
               value={cityInfo}
               onChange={handleChange}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               className="weather-search-input"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSearch();
+                if (e.key === "Enter") handleSearch();
               }}
             />
-            <button onClick={handleSearch} className="primary-button">Search</button>
+            <button onClick={handleSearch} className="primary-button">
+              Search
+            </button>
             <button
               onClick={handleUseCurrentLocation}
               disabled={loadingLocation}
               className="secondary-button"
               title="Use Current Location"
             >
-              {loadingLocation ? 'Detecting...' : 'Use Current Location'}
+              {loadingLocation ? "Detecting..." : "Use Current Location"}
             </button>
 
             {showSuggestions && suggestions.length > 0 && (
@@ -625,8 +762,13 @@ function App() {
                     className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-gray-800 border-b border-gray-200 last:border-b-0 transition"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
-                    <span className="font-semibold text-blue-900">{suggestion.name}</span>
-                    <span className="text-sm text-gray-600 ml-2">{suggestion.region ? `${suggestion.region}, ` : ''}{suggestion.country}</span>
+                    <span className="font-semibold text-blue-900">
+                      {suggestion.name}
+                    </span>
+                    <span className="text-sm text-gray-600 ml-2">
+                      {suggestion.region ? `${suggestion.region}, ` : ""}
+                      {suggestion.country}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -656,6 +798,6 @@ function App() {
         )}
       </div>
     </div>
-  )
-  }
+  );
+}
 export default App;
